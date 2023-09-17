@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Horários</title>
+</head>
+<body>
+    <h1>Agendamento de Horários</h1>
+    <form id="scheduleForm">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" required>
+        <label for="time">Horário:</label>
+        <input type="time" id="time" required>
+        <button type="submit">Agendar</button>
+    </form>
+
+    <ul id="scheduleList">
+        <!-- Lista de horários agendados será exibida aqui -->
+    </ul>
+
+    <script>
+        const scheduleForm = document.getElementById('scheduleForm');
+        const scheduleList = document.getElementById('scheduleList');
+
+        scheduleForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const time = document.getElementById('time').value;
+
+            const listItem = document.createElement('li');
+            listItem.textContent = `Nome: ${name}, Horário: ${time}`;
+            scheduleList.appendChild(listItem);
+
+            // Enviar o agendamento para o servidor Node.js
+            fetch('/addAppointment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, time }),
+            })
+            .then((response) => response.text())
+            .then((data) => console.log(data));
+
+            // Limpar os campos do formulário
+            document.getElementById('name').value = '';
+            document.getElementById('time').value = '';
+        });
+
+        // Atualizar a lista de agendamentos a partir do servidor Node.js
+        fetch('/getAppointments')
+            .then((response) => response.json())
+            .then((data) => {
+                data.forEach((appointment) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Nome: ${appointment.name}, Horário: ${appointment.time}`;
+                    scheduleList.appendChild(listItem);
+                });
+            });
+    </script>
+</body>
+</html>
